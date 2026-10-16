@@ -1,0 +1,144 @@
+import { useNavigate } from "react-router-dom";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { useState } from "react";
+import {
+  BookOpen,
+  Building2,
+  FileText,
+  FolderOpen,
+  HelpCircle,
+  Image,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Quote,
+  Settings,
+  Star,
+  Wrench,
+  X,
+} from "lucide-react";
+import { Logo } from "@/components/site/Logo";
+import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
+import { authService } from "@/services/adminService";
+import { EntityManager, entities } from "@/components/admin/EntityManager";
+import {
+  Dashboard,
+  Media,
+  Messages,
+  PagesContent,
+  Quotes,
+  SiteSettings,
+} from "@/components/admin/views";
+const nav = [
+  ["Dashboard", LayoutDashboard],
+  ["Quote Requests", Quote],
+  ["Contact Messages", MessageSquare],
+  ["Pages / Content", FileText],
+  ["Elevators", Building2],
+  ["Services", Wrench],
+  ["Projects", FolderOpen],
+  ["Blog", BookOpen],
+  ["Testimonials", Star],
+  ["FAQs", HelpCircle],
+  ["Media", Image],
+  ["Site Settings", Settings],
+];
+export default function Admin() {
+  usePageMeta("Content Manager | Compass Elevators", "Private website and enquiry management.", {
+    noindex: true,
+  });
+  const [view, setView] = useState("Dashboard"),
+    [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  async function signOut() {
+    await authService.signOut();
+    navigate("/auth", { replace: true });
+  }
+  return (
+    <>
+      <Toaster richColors position="top-right" />
+      <div className="min-h-screen bg-secondary lg:grid lg:grid-cols-[17rem_1fr]">
+        <aside
+          className={`${open ? "fixed inset-0 z-50" : "hidden"} bg-primary text-primary-foreground lg:sticky lg:top-0 lg:block lg:h-screen`}
+        >
+          <div className="flex h-20 items-center justify-between border-b border-primary-foreground/15 px-5">
+            <Logo inverse />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+            >
+              <X />
+            </Button>
+          </div>
+          <nav className="h-[calc(100vh-9rem)] overflow-y-auto p-3">
+            {nav.map(([label, Icon]) => (
+              <button
+                key={label}
+                onClick={() => {
+                  setView(label);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm ${view === label ? "bg-accent text-accent-foreground" : "text-primary-foreground/72 hover:bg-primary-foreground/10"}`}
+              >
+                <Icon className="size-4" />
+                {label}
+              </button>
+            ))}
+          </nav>
+          <button
+            onClick={signOut}
+            className="mx-3 flex items-center gap-3 px-3 text-sm text-primary-foreground/72"
+          >
+            <LogOut className="size-4" />
+            Sign out
+          </button>
+        </aside>
+        <main className="min-w-0">
+          <header className="flex h-20 items-center justify-between border-b border-border bg-card px-5 md:px-8">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="lg:hidden"
+                onClick={() => setOpen(true)}
+                aria-label="Open menu"
+              >
+                <Menu />
+              </Button>
+              <div>
+                <p className="text-xs font-bold uppercase text-muted-foreground">Content manager</p>
+                <h1 className="text-xl font-bold">{view}</h1>
+              </div>
+            </div>
+            <a
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden text-sm font-semibold text-primary md:block"
+            >
+              View website ↗
+            </a>
+          </header>
+          <div className="p-5 md:p-8">
+            <AdminView view={view} go={setView} />
+          </div>
+        </main>
+      </div>
+    </>
+  );
+}
+function AdminView({ view, go }) {
+  if (view === "Dashboard") return <Dashboard go={go} />;
+  if (view === "Quote Requests") return <Quotes />;
+  if (view === "Contact Messages") return <Messages />;
+  if (view === "Pages / Content") return <PagesContent />;
+  if (view === "Media") return <Media />;
+  if (view === "Site Settings") return <SiteSettings />;
+  const cfg = entities[view];
+  return cfg ? <EntityManager cfg={cfg} /> : null;
+}

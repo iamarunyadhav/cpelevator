@@ -1,0 +1,60 @@
+import { Link } from "react-router-dom";
+import { ArrowRight, Building2 } from "lucide-react";
+import solutions from "@/assets/elevator-solutions.jpg";
+import { PublicLayout } from "@/components/site/PublicLayout";
+import { PageHero } from "@/components/site/PageHero";
+import { QuoteCta } from "@/components/site/QuoteCta";
+import { contentService } from "@/services/contentService";
+import { useSite } from "@/lib/site-context";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { useLoad } from "@/hooks/useLoad";
+import { PageLoader } from "@/components/site/PageLoader";
+function ElevatorsView({ data }) {
+  const elevators = data;
+  const { c, img } = useSite();
+  return (
+    <PublicLayout>
+      <PageHero
+        eyebrow="Our range"
+        title={c("elevators_title")}
+        description={c("elevators_desc")}
+      />
+      <section className="py-20">
+        <div className="page-shell">
+          <img
+            src={img("elevators_image", solutions)}
+            width={1920}
+            height={1024}
+            alt="Passenger, goods and home elevator examples"
+            className="mb-14 aspect-[16/6] w-full object-cover"
+          />
+          <div className="grid gap-px border border-border bg-border md:grid-cols-2">
+            {elevators.map((x) => (
+              <Link to={`/elevators/${x.slug}`} className="group bg-card p-8" key={x.slug}>
+                <Building2 className="size-7 text-accent" />
+                <p className="mt-8 eyebrow">{x.category}</p>
+                <h2 className="mt-3 text-2xl font-bold">{x.name}</h2>
+                <p className="mt-4 leading-7 text-muted-foreground">{x.summary}</p>
+                <span className="mt-7 flex items-center gap-2 font-bold text-primary">
+                  Explore solution{" "}
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+      <QuoteCta />
+    </PublicLayout>
+  );
+}
+
+export default function Elevators() {
+  usePageMeta(
+    "Elevator Solutions Sri Lanka | Compass Elevators",
+    "Explore passenger, goods, hospital and home elevators plus escalator solutions.",
+  );
+  const { data } = useLoad(() => contentService.elevators());
+  if (!data) return <PageLoader />;
+  return <ElevatorsView data={data} />;
+}

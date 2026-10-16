@@ -1,0 +1,65 @@
+import { MapPin } from "lucide-react";
+import solutions from "@/assets/elevator-solutions.jpg";
+import { PublicLayout } from "@/components/site/PublicLayout";
+import { PageHero } from "@/components/site/PageHero";
+import { QuoteCta } from "@/components/site/QuoteCta";
+import { contentService } from "@/services/contentService";
+import { useSite } from "@/lib/site-context";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { useLoad } from "@/hooks/useLoad";
+import { PageLoader } from "@/components/site/PageLoader";
+function ProjectsView({ data }) {
+  const projects = data;
+  const { c } = useSite();
+  return (
+    <PublicLayout>
+      <PageHero
+        eyebrow="Selected work"
+        title={c("projects_title")}
+        description={c("projects_desc")}
+      />
+      <section className="py-20">
+        <div className="page-shell grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {projects.map((p, i) => (
+            <article key={p.title} className="group border border-border bg-card">
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src={p.image || solutions}
+                  width={1920}
+                  height={1024}
+                  loading="lazy"
+                  alt="Elevator project example"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  style={p.image ? undefined : { objectPosition: `${i * 45}% center` }}
+                />
+              </div>
+              <div className="p-6">
+                <p className="eyebrow">{p.category}</p>
+                <h2 className="mt-3 text-xl font-bold">{p.title}</h2>
+                <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="size-4 text-accent" />
+                  {p.location}
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">{p.service}</p>
+                {p.summary && (
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{p.summary}</p>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <QuoteCta />
+    </PublicLayout>
+  );
+}
+
+export default function Projects() {
+  usePageMeta(
+    "Elevator Projects | Compass Elevators Sri Lanka",
+    "A look at editable examples of elevator installations, upgrades and service projects.",
+  );
+  const { data } = useLoad(() => contentService.projects());
+  if (!data) return <PageLoader />;
+  return <ProjectsView data={data} />;
+}

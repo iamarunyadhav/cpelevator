@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Keep all application data access behind `src/services` interfaces — they call the Laravel API in `../backend` through `src/lib/api.ts` (base URL from `VITE_API_URL`). Supabase has been removed.
-- Public website routes remain separate TanStack route files for shareable URLs and route-specific metadata.
+- Routing uses react-router-dom (see `src/App.jsx`); each page lives in `src/pages`.
 
 - Public page text/images are DB-driven: field definitions in src/content/fields.ts (defaults) with overrides in site_content; read through src/services/contentService.ts and the root loader (useSite). Why: admin edits must reflect on the site without code changes.
 - Images are uploaded to the Laravel API (`POST /api/admin/media`) and served from `GET /api/media/*`.
